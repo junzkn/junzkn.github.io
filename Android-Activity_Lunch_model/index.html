@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://junzkn.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","width":300,"display":"post","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="概述在应用程序中，Activity是使用栈形式管理的，多个Activity一般会按照先进后出的方式存放到Task栈中。Activity间的跳转就是Task栈中各Activity切换，位于栈顶的Activity就是我们可见可交互的Activity。启动模式，可以控制Activity的启动方式，是在Task栈中创建新的Activity还是复用以前的Activity。 启动模式的设置在AndroidMa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Activity启动模式">
+<meta property="og:url" content="http://junzkn.github.io/Android-Activity_Lunch_model/index.html">
+<meta property="og:site_name" content="Never And Ever">
+<meta property="og:description" content="概述在应用程序中，Activity是使用栈形式管理的，多个Activity一般会按照先进后出的方式存放到Task栈中。Activity间的跳转就是Task栈中各Activity切换，位于栈顶的Activity就是我们可见可交互的Activity。启动模式，可以控制Activity的启动方式，是在Task栈中创建新的Activity还是复用以前的Activity。 启动模式的设置在AndroidMa">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F1.jpg">
+<meta property="og:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F2.jpg">
+<meta property="og:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F3.jpg">
+<meta property="og:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F4.jpg">
+<meta property="og:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F5.jpg">
+<meta property="og:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F6.jpg">
+<meta property="article:published_time" content="2018-10-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2018-10-17T16:00:00.000Z">
+<meta property="article:author" content="Jun">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Activity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://junzkn.github.io/Android-Activity_Lunch_model/activity%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F1.jpg">
+
+<link rel="canonical" href="http://junzkn.github.io/Android-Activity_Lunch_model/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Activity启动模式 | Never And Ever</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Never And Ever</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">thanks for coming</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-时间线">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>时间线</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://junzkn.github.io/Android-Activity_Lunch_model/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Jun">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Never And Ever">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Activity启动模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-10-18 00:00:00" itemprop="dateCreated datePublished" datetime="2018-10-18T00:00:00+08:00">2018-10-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>在应用程序中，Activity是使用栈形式管理的，多个Activity一般会按照先进后出的方式存放到Task栈中。Activity间的跳转就是Task栈中各Activity切换，位于栈顶的Activity就是我们可见可交互的Activity。启动模式，可以控制Activity的启动方式，是在Task栈中创建新的Activity还是复用以前的Activity。</p>
+<h2 id="启动模式的设置"><a href="#启动模式的设置" class="headerlink" title="启动模式的设置"></a>启动模式的设置</h2><p>在AndroidManifest文件中的Activity配置中设置。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">".MainnActivity"</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:launchMode</span>=<span class="string">"standard"</span>/&gt;</span> <span class="comment">&lt;!--这里设置模式--&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Standard模式"><a href="#Standard模式" class="headerlink" title="Standard模式"></a>Standard模式</h2><p>标准模式也是默认模式。Activity在这种模式下，每一个intent发送去启动Activity时，都会创建一个新的Activity并放到Task栈顶中。</p>
+<h3 id="表现"><a href="#表现" class="headerlink" title="表现"></a>表现</h3><p>启动Activity时(其他应用的Activity也是)，会创建新的Activity并放到本应用Task栈顶。</p>
+<p><img src="/Android-Activity_Lunch_model/activity启动模式1.jpg" alt></p>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><p>没有特殊要求时，一般的Activity都会使用该模式。</p>
+<h2 id="SingleTop模式"><a href="#SingleTop模式" class="headerlink" title="SingleTop模式"></a>SingleTop模式</h2><p>Activity在SingleTop模式下，如果Task栈顶已经存在一个该Activity，就不会再创建新的Activity，取而代之的是通过onNewIntent()方法将Intent发送至这个存在的Activity，也就是复用该ctivity。如果Task栈顶不存在相同类型的Activity，就会创建新的Activity并放到Task栈顶。</p>
+<h3 id="表现-1"><a href="#表现-1" class="headerlink" title="表现"></a>表现</h3><p>如果栈顶不存在该Activity，和standard模式一样。</p>
+<p><img src="/Android-Activity_Lunch_model/activity启动模式2.jpg" alt></p>
+<p>如果存在则复用。</p>
+<p><img src="/Android-Activity_Lunch_model/activity启动模式3.jpg" alt></p>
+<h3 id="应用场景-1"><a href="#应用场景-1" class="headerlink" title="应用场景"></a>应用场景</h3><p>搜索功能界面的Activity。点击搜索之后都是跳回本Activity，不去创建新的Activity。</p>
+<h2 id="SingleTask模式"><a href="#SingleTask模式" class="headerlink" title="SingleTask模式"></a>SingleTask模式</h2><p>一个Activity使用了SingleTask的话，如果该Task栈中存在该Activity，启动时就会把该Activity之上所有的Activity移出栈(按适当的生命周期销毁)，使该Activity变成栈顶Activity，并通过onNewIntent()方法复用该Activity。如果Task栈中没有改Activity，便创建新的Activity放到Task栈顶。</p>
+<h3 id="表现-2"><a href="#表现-2" class="headerlink" title="表现"></a>表现</h3><p>栈中没有该Activity时，创建Activity并放到栈顶。</p>
+<p><img src="/Android-Activity_Lunch_model/activity启动模式4.jpg" alt></p>
+<p>如果存在则是先把上面的Activities移出栈，使用onNewIntent()复用该Activity。</p>
+<p><img src="/Android-Activity_Lunch_model/activity启动模式5.jpg" alt></p>
+<h3 id="应用场景-2"><a href="#应用场景-2" class="headerlink" title="应用场景"></a>应用场景</h3><p>入口处Activity，例如邮件客户端的收件箱页面或者社交应用的时间轴页面。可以使用该模式。</p>
+<h2 id="SingleInstance模式"><a href="#SingleInstance模式" class="headerlink" title="SingleInstance模式"></a>SingleInstance模式</h2><p>这种模式下的Activity，只能一个Activity存在于一个栈中。当启动Activity时，若不存在该Activity，创建一个新的Task栈并创建Activity放到新Task栈顶；如果存在其他Task栈有该Activity，便把该Task栈调至前台。</p>
+<h3 id="表现-3"><a href="#表现-3" class="headerlink" title="表现"></a>表现</h3><p>永远都是一个Task栈存放该Activity。</p>
+<p><img src="/Android-Activity_Lunch_model/activity启动模式6.jpg" alt></p>
+<h3 id="应用场景-3"><a href="#应用场景-3" class="headerlink" title="应用场景"></a>应用场景</h3><p>这种模式很少被使用到。一些真实的使用场景是一个用于Launcher的Activity或者是那种你100%确保只有一个 Activity的应用程序。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关阅读</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Android-Activity_change\" rel="bookmark">Activity的横竖屏切换</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Android-Activity_life_recycle\" rel="bookmark">Activity生命周期</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Android-ANR\" rel="bookmark">ANR异常</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/Activity/" rel="tag"><i class="fa fa-tag"></i> Activity</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Algorithm_design-Sorting_Algorithm/" rel="prev" title="排序算法">
+      <i class="fa fa-chevron-left"></i> 排序算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/Android-Activity_life_recycle/" rel="next" title="Activity生命周期">
+      Activity生命周期 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动模式的设置"><span class="nav-number">2.</span> <span class="nav-text">启动模式的设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Standard模式"><span class="nav-number">3.</span> <span class="nav-text">Standard模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#表现"><span class="nav-number">3.1.</span> <span class="nav-text">表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景"><span class="nav-number">3.2.</span> <span class="nav-text">应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SingleTop模式"><span class="nav-number">4.</span> <span class="nav-text">SingleTop模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#表现-1"><span class="nav-number">4.1.</span> <span class="nav-text">表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景-1"><span class="nav-number">4.2.</span> <span class="nav-text">应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SingleTask模式"><span class="nav-number">5.</span> <span class="nav-text">SingleTask模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#表现-2"><span class="nav-number">5.1.</span> <span class="nav-text">表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景-2"><span class="nav-number">5.2.</span> <span class="nav-text">应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SingleInstance模式"><span class="nav-number">6.</span> <span class="nav-text">SingleInstance模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#表现-3"><span class="nav-number">6.1.</span> <span class="nav-text">表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景-3"><span class="nav-number">6.2.</span> <span class="nav-text">应用场景</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jun"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-plane"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junzkn</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>

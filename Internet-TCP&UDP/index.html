@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://junzkn.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","width":300,"display":"post","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="TCP和UDP概述在网络框架结构体系中，最主要的便是传输层，它是一个承上启下的环节，主要工作是负责端到端之间的通信。在这一层中有两个重要的协议：1.用户数据报协议UDP(User Datagram Protocol)；传输控制协议TCP(Transmission Control Protocol)。  传输控制协议TCPTCP，提供面向连接的服务，在传送数据之前必须先建立连接，数据传送完成后要释放">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP和UDP的区别">
+<meta property="og:url" content="http://junzkn.github.io/Internet-TCP&UDP/index.html">
+<meta property="og:site_name" content="Never And Ever">
+<meta property="og:description" content="TCP和UDP概述在网络框架结构体系中，最主要的便是传输层，它是一个承上启下的环节，主要工作是负责端到端之间的通信。在这一层中有两个重要的协议：1.用户数据报协议UDP(User Datagram Protocol)；传输控制协议TCP(Transmission Control Protocol)。  传输控制协议TCPTCP，提供面向连接的服务，在传送数据之前必须先建立连接，数据传送完成后要释放">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://junzkn.github.io/Internet-TCP&UDP/TCP%E5%92%8CUDP.png">
+<meta property="og:image" content="http://junzkn.github.io/Internet-TCP&UDP/TCP%E9%A6%96%E9%83%A8.jpg">
+<meta property="og:image" content="http://junzkn.github.io/Internet-TCP&UDP/UDP%E9%A6%96%E9%83%A8.png">
+<meta property="article:published_time" content="2018-10-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2018-10-22T16:00:00.000Z">
+<meta property="article:author" content="Jun">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://junzkn.github.io/Internet-TCP&UDP/TCP%E5%92%8CUDP.png">
+
+<link rel="canonical" href="http://junzkn.github.io/Internet-TCP&UDP/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>TCP和UDP的区别 | Never And Ever</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Never And Ever</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">thanks for coming</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-时间线">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>时间线</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://junzkn.github.io/Internet-TCP&UDP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Jun">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Never And Ever">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TCP和UDP的区别
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-10-23 00:00:00" itemprop="dateCreated datePublished" datetime="2018-10-23T00:00:00+08:00">2018-10-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="TCP和UDP概述"><a href="#TCP和UDP概述" class="headerlink" title="TCP和UDP概述"></a>TCP和UDP概述</h2><p>在网络框架结构体系中，最主要的便是传输层，它是一个承上启下的环节，主要工作是负责端到端之间的通信。在这一层中有两个重要的协议：1.用户数据报协议UDP(User Datagram Protocol)；传输控制协议TCP(Transmission Control Protocol)。</p>
+<p><img src="/Internet-TCP&UDP/TCP和UDP.png" alt></p>
+<h3 id="传输控制协议TCP"><a href="#传输控制协议TCP" class="headerlink" title="传输控制协议TCP"></a>传输控制协议TCP</h3><p>TCP，提供<strong>面向连接的服务</strong>，在传送数据之前必须先建立连接，数据传送完成后要释放连接。因此TCP是一种可靠的的运输服务，但是正因为这样，不可避免的增加了许多的开销，比如确认连接，流量控制等。对应的应用层的协议主要有 SMTP,TELNET,HTTP,FTP 等。</p>
+<h3 id="用户数据报协议UDP"><a href="#用户数据报协议UDP" class="headerlink" title="用户数据报协议UDP"></a>用户数据报协议UDP</h3><p>UDP，在传送数据前不需要先建立连接，远地的主机在收到UDP报文后也不需要给出任何确认。虽然UDP不提供可靠交付，但是正是因为这样，省去和很多的开销，使得它的速度比较快，比如一些对实时性要求较高的服务，就常常使用的是UDP。对应的应用层的协议主要有 DNS,TFTP,DHCP,SNMP,NFS 等。</p>
+<h2 id="传输层常用端口号"><a href="#传输层常用端口号" class="headerlink" title="传输层常用端口号"></a>传输层常用端口号</h2><p>端口是传输层服务访问点(TSAP)，端口的作用是让应用层的各种应用进程都能将其数据通过端口向下交付给传输层，以及让传输层知道应当将其报文段中的数据向上通过端口交付给应用层的进程。下面是常用端口。</p>
+<table>
+<thead>
+<tr>
+<th align="center">应用程序</th>
+<th align="center">FTP</th>
+<th align="center">TELNET</th>
+<th align="center">SMTP</th>
+<th align="center">HTTP</th>
+<th align="center">HTTPS</th>
+<th align="center">DNS</th>
+<th align="center">TFTP</th>
+<th align="center">SNMP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">熟知端口</td>
+<td align="center">21</td>
+<td align="center">23</td>
+<td align="center">25</td>
+<td align="center">80</td>
+<td align="center">443</td>
+<td align="center">53</td>
+<td align="center">69</td>
+<td align="center">161</td>
+</tr>
+<tr>
+<td align="center">传输层协议</td>
+<td align="center">TCP</td>
+<td align="center">TCP</td>
+<td align="center">TCP</td>
+<td align="center">TCP</td>
+<td align="center">TCP</td>
+<td align="center">UDP</td>
+<td align="center">UDP</td>
+<td align="center">UDP</td>
+</tr>
+</tbody></table>
+<h2 id="TCP和UDP首部"><a href="#TCP和UDP首部" class="headerlink" title="TCP和UDP首部"></a>TCP和UDP首部</h2><h3 id="TCP首部"><a href="#TCP首部" class="headerlink" title="TCP首部"></a>TCP首部</h3><p><img src="/Internet-TCP&UDP/TCP首部.jpg" alt="TCP首部"></p>
+<ol>
+<li><p>第一个4字节：</p>
+<ul>
+<li>源端口，16位；发送数据的源进程端口。</li>
+<li>目的端口，16位；接收数据的进程端口。</li>
+</ul>
+</li>
+<li><p>第二个4字节与第三个4字节</p>
+<ul>
+<li>序号，32位；代表当前TCP数据段第一个字节占整个字节流的相对位置。</li>
+<li>确认号，32位；代表接收端希望接收的数据序号，为上次接收到数据报的序号+1，当ACK标志位为1时才生效。</li>
+</ul>
+</li>
+<li><p>第四个4字节</p>
+<ul>
+<li><p>数据偏移，4位；实际代表TCP首部长度，最大为60字节。</p>
+</li>
+<li><p>6个标志位，每个标志位1位。</p>
+<p>紧急URG，当URG=1，表明紧急指针字段有效。告诉系统此报文段中有紧急数据；</p>
+<p>确认ACK，仅当ACK=1时，确认号字段才有效。TCP规定，在连接建立后所有报文的传输都必须把ACK置1；</p>
+<p>推送PSH，当两个应用进程进行交互式通信时，有时在一端的应用进程希望在键入一个命令后立即就能收到对方的响应，这时候就将PSH=1；</p>
+<p>复位RST，当RST=1，表明TCP连接中出现严重差错，必须释放连接，然后再重新建立连接；</p>
+<p>同步SYN，在连接建立时用来同步序号。当SYN=1，ACK=0，表明是连接请求报文，若同意连接，则响应报文中应该使SYN=1，ACK=1；</p>
+<p>终止FIN，用来释放连接。当FIN=1，表明此报文的发送方的数据已经发送完毕，并且要求释放。</p>
+</li>
+<li><p>窗口值，16位；指的是通知接收方，发送本报文你需要有多大的空间来接受。</p>
+</li>
+</ul>
+</li>
+<li><p>第五个4字节</p>
+<ul>
+<li>校验和，16位；用于检验首部和数据的完整性。</li>
+<li>紧急指针，16位；只有当URG标识位为1时，紧急指针才有效。紧急指针的值与序号的相加值为紧急数据的最后一个字节位置。用于发送紧急数据。</li>
+</ul>
+</li>
+</ol>
+<h3 id="UDP首部"><a href="#UDP首部" class="headerlink" title="UDP首部"></a>UDP首部</h3><p><img src="/Internet-TCP&UDP/UDP首部.png" alt="UDP首部"></p>
+<ol>
+<li><p>后8个字节</p>
+<ul>
+<li>源端口，16位；发送数据的源进程端口。</li>
+<li>目的端口，16位；接收数据的进程端口。</li>
+<li>长度，16位；UDP数据长度。</li>
+<li>检验和，16位；检测UDP在传输中是否有错，有错早就丢弃。</li>
+</ul>
+</li>
+<li><p>前12个字节</p>
+<p>伪首部：不是真正的UDP首部，只是在计算校验和时，临时添加在UDP前，得到一个临时的UDP。校验和就是更根据这个临时的UDP来计算的。伪首部既不向下传递也不向上递交，而是仅仅为了计算校验和。</p>
+</li>
+</ol>
+<h2 id="TCP和UDP区别"><a href="#TCP和UDP区别" class="headerlink" title="TCP和UDP区别"></a>TCP和UDP区别</h2><ol>
+<li>TCP基于连接；UDP基于无连接。</li>
+<li>TCP要求系统资源较多；UDP较少。</li>
+<li>TCP提供可靠的服务。也就是说，通过TCP连接传送的数据，无差错，不丢失，不重复，且按序到达;UDP尽最大努力交付，即不保证可靠交付</li>
+<li>TCP连接只能是点到点的，UDP支持一对一，一对多，多对一和多对多的交互通信。</li>
+<li>TCP面向字节流，实际上是TCP把数据看成一连串无结构的字节流;UDP是面向报文的。</li>
+<li>TCP有拥塞控制；UDP没有拥塞控制，因此网络出现拥塞不会使源主机的发送速率降低。</li>
+<li>TCP首部开销20字节;UDP的首部开销小，只有8个字节。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关阅读</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Internet-HTTP\" rel="bookmark">HTTP</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Internet-IMAP\" rel="bookmark">IMAP</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Internet-Network-architecture\" rel="bookmark">计算机网络体系结构</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Internet-Network-architecture/" rel="prev" title="计算机网络体系结构">
+      <i class="fa fa-chevron-left"></i> 计算机网络体系结构
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/Algorithm_design-LRU/" rel="next" title="LRU算法">
+      LRU算法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP和UDP概述"><span class="nav-number">1.</span> <span class="nav-text">TCP和UDP概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传输控制协议TCP"><span class="nav-number">1.1.</span> <span class="nav-text">传输控制协议TCP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户数据报协议UDP"><span class="nav-number">1.2.</span> <span class="nav-text">用户数据报协议UDP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传输层常用端口号"><span class="nav-number">2.</span> <span class="nav-text">传输层常用端口号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP和UDP首部"><span class="nav-number">3.</span> <span class="nav-text">TCP和UDP首部</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP首部"><span class="nav-number">3.1.</span> <span class="nav-text">TCP首部</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UDP首部"><span class="nav-number">3.2.</span> <span class="nav-text">UDP首部</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP和UDP区别"><span class="nav-number">4.</span> <span class="nav-text">TCP和UDP区别</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jun"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-plane"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junzkn</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>

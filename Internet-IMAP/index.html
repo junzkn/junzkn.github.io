@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://junzkn.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","width":300,"display":"post","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="概述IMAP（Internet Mail Access Protocol）网络邮件访问协议是一个应用层协议，用于从本地客户端访问远程服务器上的邮件。现在的版本是4rev1（IMAP4rve1）。IMAP协议运行在TCP&#x2F;IP协议之上，SSL使用的端口是993，非SSL使用的端口号是143。IMAP的权威定义是RFC3501，具体协议内容可以查阅此http:&#x2F;&#x2F;www.faqs.org&#x2F;rfcs&#x2F;r">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IMAP">
+<meta property="og:url" content="http://junzkn.github.io/Internet-IMAP/index.html">
+<meta property="og:site_name" content="Never And Ever">
+<meta property="og:description" content="概述IMAP（Internet Mail Access Protocol）网络邮件访问协议是一个应用层协议，用于从本地客户端访问远程服务器上的邮件。现在的版本是4rev1（IMAP4rve1）。IMAP协议运行在TCP&#x2F;IP协议之上，SSL使用的端口是993，非SSL使用的端口号是143。IMAP的权威定义是RFC3501，具体协议内容可以查阅此http:&#x2F;&#x2F;www.faqs.org&#x2F;rfcs&#x2F;r">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-03-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2019-03-10T16:00:00.000Z">
+<meta property="article:author" content="Jun">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://junzkn.github.io/Internet-IMAP/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>IMAP | Never And Ever</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Never And Ever</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">thanks for coming</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-时间线">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>时间线</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://junzkn.github.io/Internet-IMAP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Jun">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Never And Ever">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          IMAP
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-03-11 00:00:00" itemprop="dateCreated datePublished" datetime="2019-03-11T00:00:00+08:00">2019-03-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>IMAP（Internet Mail Access Protocol）网络邮件访问协议是一个应用层协议，用于从本地客户端访问远程服务器上的邮件。现在的版本是4rev1（IMAP4rve1）。IMAP协议运行在TCP/IP协议之上，SSL使用的端口是<strong>993</strong>，非SSL使用的端口号是<strong>143</strong>。IMAP的权威定义是RFC3501，具体协议内容可以查阅此<a href="http://www.faqs.org/rfcs/rfc3501.html" target="_blank" rel="noopener">http://www.faqs.org/rfcs/rfc3501.html</a>，中文版的在<a href="http://blog.csdn.net/qqnnhhbb/article/details/6428681" target="_blank" rel="noopener">http://blog.csdn.net/qqnnhhbb/article/details/642868</a>。</p>
+<h2 id="和POP3的区别"><a href="#和POP3的区别" class="headerlink" title="和POP3的区别"></a>和POP3的区别</h2><p>传统的POP3协议是将服务器上的文件下载到本地，然后对本地的邮件进行操作，操作是不会反馈到服务器上的。而IMAP提供服务端和客户端之间的双向通信，客户端和服务端的每个操作都会同步。同时，IMAP也提供邮件下载的服务，并且能够访问邮件的每一个MIME部分（几乎所有邮件都是以MIME格式传输），让我们能够根据时间、主题、发件人等信息确定是否下载邮件。此外，IMAP支持多设备随时访问邮件。</p>
+<h2 id="IMAP连接"><a href="#IMAP连接" class="headerlink" title="IMAP连接"></a>IMAP连接</h2><p>一次基本的IMAP连接有以下基本完成：</p>
+<ol>
+<li>建立服务端和客户端的链接</li>
+<li>服务器初始欢迎</li>
+<li>服务器和客户端进行交互，交互形式为：<ol>
+<li>客户端发送命令</li>
+<li>服务器返回请求数据</li>
+<li>服务器返回完成响应</li>
+</ol>
+</li>
+</ol>
+<p>客户端命令引发操作。每个客户端命令以一个标识作为前缀（典型的有字母、数字构成的短字符串，如：A001，A002，等等）――它称为“标签”。客户端为每个命令生成不同的“标签”，也称每个客户端命令都是标签化的。</p>
+<p>IMAP服务器端的协议接收端，从客户端读取命令行，解析该命令行及其参数，并传送服务器数据（非标签化，以*或+开头）及一个服务器命令（标签化，有与客户端请求命令相同的前缀）完成结果的响应。</p>
+<h2 id="协议状态"><a href="#协议状态" class="headerlink" title="协议状态"></a>协议状态</h2><p>一旦客户端和服务器间的连接建立完成，一个IMAP4rev1连接就会处于4种状态中的某一种：</p>
+<ol>
+<li>未认证状态 ：在未认证状态下，大多数命令在得到许可前，客户端必须提供认证证书。若非连接已经是预认证了的，一个连接开始时，就进入了未认证状态。 </li>
+<li>认证状态 ：在认证状态下，客户端是认证了的，它必须先于影响邮件的命令被许可前，选择一个邮箱以访问。当一个预认证连接开始，被认可的认证证书已经提供，选择一个邮箱发生错误后，或者一个成功的CLOSE命令后，就进入了认证状态。</li>
+<li>选中状态 ：在一个选中状态，一个邮箱被选中以访问。当一个邮箱被成功选中时，就进入了这个状态。</li>
+<li>注销状态 ：在注销状态下，连接正在被终止。一个客户端请求（通过LOGOUT命令），或者客户端、服务器的单方面动作，都会导致进入这个状态。</li>
+</ol>
+<p>之所以提及到状态，是因为IMAP协议的很多指令只有在处于某种状态下才会有效。下面是一些基本指令的作用的权限：</p>
+<ol>
+<li>在任何状态下都有效的指令（全局命令）：CAPALIBILY，NOOP，LOGOUT。</li>
+<li>未认证状态下有效的指令（未认证状态命令）：STARTTLS,AUTHENTICATE，LOGIN和全局命令。</li>
+<li>认证状态下有效的指令（认证状态命令）：SELECT，EXAMINE，CREATE，DELETE，RENAME，SUBSCRIBE，UNSUBSCRIBE，LIST，LSUB，STATUS，APPEND和全局命令</li>
+<li>在选中状态下有效的指令（选中状态指令）：CHECK，CLOSE，EXPUNGE，SEARCH，FETCH，STORE，COPY，UID和全局命令、认证状态命令</li>
+</ol>
+<h2 id="常用指令"><a href="#常用指令" class="headerlink" title="常用指令"></a>常用指令</h2><h3 id="create-folder"><a href="#create-folder" class="headerlink" title="create {folder}"></a>create {folder}</h3><p>CREATE可以创建指定名字的新邮箱。邮箱名称通常是带路径的文件夹全名。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A003 CREATE owatagusiam/                 </span><br><span class="line">S: A003 OK CREATE completed</span><br><span class="line">C: A004 CREATE owatagusiam/blurdybloop  </span><br><span class="line">S: A004 OK CREATE completed</span><br></pre></td></tr></table></figure>
+
+<h3 id="DELETE-folder"><a href="#DELETE-folder" class="headerlink" title="DELETE {folder}"></a>DELETE {folder}</h3><p>DELETE命令删除指定名字的文件夹。文件夹名字通常是带路径的文件夹全名，当邮箱被删除后，其中的邮件也不复存在。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A683 DELETE blurdybloop</span><br><span class="line">S: A683 OK DELETE completed</span><br><span class="line">C: A684 DELETE foo</span><br><span class="line">S: A684 NO Name <span class="string">"foo"</span> has inferior hierarchical names</span><br><span class="line">C: A685 DELETE foo/bar</span><br><span class="line">S: A685 OK DELETE Completed</span><br></pre></td></tr></table></figure>
+
+<h3 id="RENAME-old-folder-new-folder"><a href="#RENAME-old-folder-new-folder" class="headerlink" title="RENAME {old folder}{new folder}"></a>RENAME {old folder}{new folder}</h3><p>RENAME命令可以修改文件夹的名称，它使用两个参数：当前邮箱名和新邮箱名，两个参数的命名符合标准路径命名规则。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A683 RENAME blurdybloop sarasoop</span><br><span class="line">S: A683 OK RENAME completed</span><br><span class="line">C: A684 RENAME stuff/junk newbox        </span><br><span class="line">S: A684 OK RENAME Completed</span><br></pre></td></tr></table></figure>
+
+<h3 id="LIST-BASE-template"><a href="#LIST-BASE-template" class="headerlink" title="LIST {BASE}{template}"></a>LIST {BASE}{template}</h3><p>LIST命令用于列出邮箱中已有的文件夹，有点像操作系统的列目录命令，有两个参数，邮箱路径参数BASE：表示用户登陆目录；第二个参数template：表示希望显示的邮箱名。这个命令可以包含起始的路径位置和需要列出的文件夹所符合的特征，可以使用通配符”*”。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A101 LIST <span class="string">""</span> <span class="string">""</span></span><br><span class="line">S: * LIST (\Noselect) <span class="string">"/"</span> <span class="string">""</span></span><br><span class="line">S: A101 OK LIST Completed</span><br><span class="line">C: A102 LIST <span class="comment">#news.comp.mail.misc ""</span></span><br><span class="line">S: * LIST (\Noselect) <span class="string">"."</span> <span class="comment">#news.</span></span><br><span class="line">S: A102 OK LIST Completed</span><br><span class="line">C: A103 LIST /usr/staff/jones <span class="string">""</span></span><br><span class="line">S: * LIST (\Noselect) <span class="string">"/"</span> /</span><br><span class="line">S: A103 OK LIST Completed</span><br><span class="line">C: A202 LIST ~/Mail/ %</span><br><span class="line">S: * LIST (\Noselect) <span class="string">"/"</span> ~/Mail/foo</span><br><span class="line">S: * LIST () <span class="string">"/"</span> ~/Mail/meetings</span><br><span class="line">S: A202 OK LIST completed</span><br></pre></td></tr></table></figure>
+
+<h3 id="APPEND-folder-attributes-date-time-size-mail-data"><a href="#APPEND-folder-attributes-date-time-size-mail-data" class="headerlink" title="APPEND {folder}{attributes}{date/time}{size}{mail data}"></a>APPEND {folder}{attributes}{date/time}{size}{mail data}</h3><p>APPEND命令允许Client上载一个邮件到指定的Folder（文件夹/邮箱）中。命令中包含了新邮件的属性、日期/时间、大小，随后是邮件数据。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A003 APPEND saved<span class="literal">-messages</span> (\Seen) &#123;<span class="number">310</span>&#125;</span><br><span class="line">C: Date: Mon， <span class="number">7</span> Feb <span class="number">1994</span> <span class="number">21</span>:<span class="number">52</span>:<span class="number">25</span> <span class="literal">-0800</span> (PST)</span><br><span class="line">C: From: Fred Foobar &lt;foobar@Blurdybloop.COM&gt;</span><br><span class="line">C: Subject: afternoon meeting</span><br><span class="line">C: To: mooch@owatagu.siam.edu</span><br><span class="line">C: Message<span class="literal">-Id</span>: &lt;B27397<span class="literal">-0100000</span>@Blurdybloop.COM&gt;</span><br><span class="line">C: MIME<span class="literal">-Version</span>: <span class="number">1.0</span></span><br><span class="line">C: Content<span class="literal">-Type</span>: TEXT/PLAIN; CHARSET=US<span class="literal">-ASCII</span></span><br><span class="line">C:</span><br><span class="line">C: Hello Joe， <span class="keyword">do</span> you think we can meet at <span class="number">3</span>:<span class="number">30</span> tomorrow?</span><br><span class="line">C:</span><br><span class="line">S: A003 OK APPEND completed</span><br></pre></td></tr></table></figure>
+
+<h3 id="SELECT-folder"><a href="#SELECT-folder" class="headerlink" title="SELECT {folder}"></a>SELECT {folder}</h3><p>SELECT命令让Client选定某个邮箱（Folder），表示即将对该邮箱（Folder）内的邮件作操作。邮箱标志的当前状态也返回给了用户，同时返回的还有一些关于邮件和邮箱的附加信息。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A142 SELECT INBOX</span><br><span class="line">S: * <span class="number">172</span> EXISTS</span><br><span class="line">S: * <span class="number">1</span> RECENT</span><br><span class="line">S: * OK [<span class="type">UNSEEN</span> <span class="number">12</span>] Message <span class="number">12</span> is first unseen</span><br><span class="line">S: * OK [<span class="type">UIDVALIDITY</span> <span class="number">3857529045</span>] UIDs valid</span><br><span class="line">S: * FLAGS (\Answered \Flagged \Deleted \Seen \Draft)</span><br><span class="line">S: * OK [<span class="type">PERMANENTFLAGS</span> (\<span class="type">Deleted</span> \<span class="type">Seen</span> \*)] Limited</span><br><span class="line">S: A142 OK [<span class="built_in">READ-WRITE</span>] SELECT completed</span><br></pre></td></tr></table></figure>
+
+<h3 id="FETCH-mail-id-datanames"><a href="#FETCH-mail-id-datanames" class="headerlink" title="FETCH {mail id}{datanames}"></a>FETCH {mail id}{datanames}</h3><p>FETCH 命令用于读取邮件的文本信息，且仅用于显示的目的。包含两个参数，messageset：表示希望读取的邮件号列表，IAMP服务器邮箱中的每个邮件都有一个唯一的ID标识，（邮件号列表参数可以是一个邮件号，也可以是由逗号分隔的多个邮件号，或者由冒号间隔的一个范围），IMAP服务器返回邮件号列表中全部邮件的指定数据项内容。</p>
+<p>数据名参数确定能够被独立返回的邮件的一部分，下面我们看看各参数返回的邮件信息：</p>
+<ul>
+<li>ALL：只返回按照一定格式的邮件摘要，包括邮件标志、RFC822.SIZE、自身的时间和信封信息。IMAP客户机能够将标准邮件解析成这些信息并显示出来。</li>
+<li>BODY：只返回邮件体文本格式和大小的摘要信息。IMAP客户机可以识别这些细腻，并向用户显示详细的关于邮件的信息。其实是一些非扩展的BODYSTRUCTURE的信息。</li>
+<li>FAST：只返回邮件的一些摘要，包括邮件标志、RFC822.SIZE、和自身的时间。</li>
+<li>FULL：同样的还是一些摘要信息，包括邮件标志、RFC822.SIZE、自身的时间和BODYSTRUCTURE的信息。</li>
+<li>BODYSTRUCTUR：是邮件的[MIME-IMB]的体结构。这是服务器通过解析[RFC-2822]头中的[MIME-IMB]各字段和[MIME-IMB]头信息得出来的。包括的内容有：邮件正文的类型、字符集、编码方式等和各附件的类型、字符集、编码方式、文件名称等等。</li>
+<li>ENVELOPE：信息的信封结构。是服务器通过解析[RFC-2822]头中的[MIME-IMB]各字段得出来的，默认各字段都是需要的。主要包括：自身的时间、附件数、收件人、发件人等。</li>
+<li>FLAGS：此邮件的标志。<br>INTERNALDATE：自身的时间。</li>
+<li>RFC822.SIZE：邮件的[RFC-2822]大小<br>RFC822.HEADER：在功能上等同于BODY.PEEK[HEADER]。</li>
+<li>RFC822：功能上等同于BODY[]。</li>
+<li>RFC822.TEXT：功能上等同于BODY[TEXT]。</li>
+<li>UID：返回邮件的UID号，UID号是唯一标识邮件的一个号码。</li>
+<li>BODY[section] {partial}：返回邮件的中的某一指定部分，返回的部分用section来表示，section部分包含的信息通常是代表某一部分的一个数字或者是下面的某一个部分：HEADER, HEADER.FIELDS, HEADER.FIELDS.NOT, MIME, and TEXT。如果section部分是空的话，那就代表返回全部的信息，包括头信息。</li>
+<li>BODY[HEADER]返回完整的文件头信息。</li>
+<li>BODY[HEADER.FIELDS ()]：在小括号里面可以指定返回的特定字段。</li>
+<li>BODY[HEADER.FIELDS.NOT ()]：在小括号里面可以指定不需要返回的特定字段。</li>
+<li>BODY[MIME]：返回邮件的[MIME-IMB]的头信息，在正常情况下跟BODY[HEADER]没有区别。</li>
+<li>BODY[TEXT]：返回整个邮件体，这里的邮件体并不包括邮件头。</li>
+</ul>
+<p>现在我们遇到了一个问题，如果我们要单独提取邮件的附件怎么办？<br>通过以上的命令我们是无法做到的，但是我们别忘了在section部分还有其他的方式可以来表示我们要提取的邮件的部分，那就的通过区段数来表示。那下面就让我们来看看什么是区段数。</p>
+<p>每个邮件都至少有一个区段数，Non-[MIME-IMB]型的邮件和non-multipart [MIME-IMB]的邮件是没有经过MIME编码之后的信息的，那这样的信息只有一个区段数1。多区段型的信息被编排成一个连续的区段数，这和实际信息里出现的是一样的。如果一个特定的区段有类型信息或者是多区段的，一个MESSAGE/RFC822类型的区段也含有嵌套的区段数，这些区段数是指向这些信息区段的信息体的。</p>
+<p>说了那么多拗口的，现在我们讲的更简单易懂一些。在一个邮件体里面，区段数1代表的邮件的正文，区段数二代表的是第一个附件，区段数三代表的是第二个附件，以此类推。在这些区段里，如果有哪个区段又是多区段的，比如2区段的内容格式是mulipart或者是 MESSAGE/RFC822类型的，那么这个区段又嵌套了多个子区段，嵌套的各子区段是用2.1，2.2……等等表示，类似，如果2.1又有嵌套，那么还会有2.1.1，2.1.2等区段。这样的嵌套是没有限制的。下面我们通过例子来了解一下fetch具体是怎么按区段下载的。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HEADER ([RFC-2822] header of the message)</span><br><span class="line">TEXT ([RFC-2822] text body of the message) MULTIPART&#x2F;MIXED</span><br><span class="line">1 TEXT&#x2F;PLAIN</span><br><span class="line">2 APPLICATION&#x2F;OCTET-STREAM</span><br><span class="line">3 MESSAGE&#x2F;RFC822</span><br><span class="line">3.HEADER ([RFC-2822] header of the message)</span><br><span class="line">3. TEXT ([RFC-2822] text body of the message) MULTIPART&#x2F;MIXED</span><br><span class="line">3.1 TEXT&#x2F;PLAIN</span><br><span class="line">3.2 APPLICATION&#x2F;OCTET-STREAM</span><br><span class="line">4 MULTIPART&#x2F;MIXED</span><br><span class="line">4.1 IMAGE&#x2F;GIF</span><br><span class="line">4.1. MIME ([MIME-IMB] header for the IMAGE&#x2F;GIF)</span><br><span class="line">4.2 MESSAGE&#x2F;RFC822</span><br><span class="line">4.2. HEADER ([RFC-2822] header of the message)</span><br><span class="line">4.2. TEXT ([RFC-2822] text body of the message) MULTIPART&#x2F;MIXED</span><br><span class="line">4.2.1 TEXT&#x2F;PLAIN</span><br><span class="line">4.2.2 MULTIPART&#x2F;ALTERNATIVE</span><br><span class="line">4.2.2.1 TEXT&#x2F;PLAIN</span><br><span class="line">4.2.2.2 TEXT&#x2F;RICHTEXT</span><br></pre></td></tr></table></figure>
+
+<p>如果我们需要取第一个附件，那么命令就是：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C:a2 fetch <span class="number">4</span> body[<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<p>取第三个区段的第一个子区段文本正文，命令就是：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C:a2 fetch <span class="number">4</span> body[<span class="number">3.1</span>]</span><br></pre></td></tr></table></figure>
+
+<p>取第四个区段的第二个子区段再嵌套的第一个子区段的文本正文，命令如下：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C:a2 fetch <span class="number">4</span> body[<span class="number">4.2</span><span class="type">.1</span>]</span><br></pre></td></tr></table></figure>
+
+<p>当然这个例子只是针对于一个特殊的邮件结构，一般的邮件应该都没有这么复杂的结构。</p>
+<p>再接下来我们再看看最后一个参数有什么用？BODY[section]可以使用partial字段进行修改，该字段包含两个用“.”隔开的数字，第一个数字、是八进制表示的希望显示的数据输出起始位置，第二个数字是八进制表示希望显示的数据长度。这项功能可以进一步设定输出格式，例如，如果你希望显示1号邮件中邮件提的前1500个字符，可以使用命令：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">FETCH <span class="number">1</span> BODY[<span class="type">TEXT</span>]&lt;<span class="number">0.1500</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>该命令取回邮件提的前1500个字符并定义为TEXT，如果邮件体少于1500个字符则返回整个邮件体。</p>
+<p>例：</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: <span class="number">100</span> FETCH <span class="number">3</span>：<span class="number">5</span>  BODY[<span class="type">header.fields</span> (<span class="type">Date</span> <span class="type">From</span> <span class="type">Subject</span>)]  </span><br><span class="line">S: *  <span class="number">3</span>  FETCH  (BODY[<span class="type">HEADER.FIELDS</span> (“<span class="type">DATE</span>” “<span class="type">FROM</span>” “<span class="type">SUBJECT</span>”)]  &#123;<span class="number">112</span>&#125;</span><br><span class="line">DATE: Tue, <span class="number">14</span> Sep <span class="number">1999</span> <span class="number">10</span>:<span class="number">09</span>:<span class="number">50</span> <span class="literal">-500</span></span><br><span class="line">From: alex@shadrach.smallorg.org</span><br><span class="line">Subject: This is the first test message</span><br><span class="line">)</span><br><span class="line">S: *  <span class="number">4</span>  FETCH  (BODY[<span class="type">HEADER.FIELDS</span> (“<span class="type">DATE</span>” “<span class="type">FROM</span>” “<span class="type">SUBJECT</span>”)]  &#123;<span class="number">113</span>&#125;</span><br><span class="line">DATE: Tue, <span class="number">14</span> Sep <span class="number">1999</span> <span class="number">10</span>:<span class="number">10</span>:<span class="number">04</span> <span class="literal">-500</span></span><br><span class="line">From: alex@shadrach.smallorg.org</span><br><span class="line">Subject: This is the second test message</span><br><span class="line">)</span><br><span class="line">S: *  <span class="number">5</span>  FETCH  (BODY[<span class="type">HEADER.FIELDS</span> (“<span class="type">DATE</span>” “<span class="type">FROM</span>” “<span class="type">SUBJECT</span>”)]  &#123;<span class="number">112</span>&#125;</span><br><span class="line">DATE: Tue, <span class="number">14</span> Sep <span class="number">1999</span> <span class="number">10</span>:<span class="number">20</span>:<span class="number">26</span> <span class="literal">-500</span></span><br><span class="line">From: alex@shadrach.smallorg.org</span><br><span class="line">Subject: This is the first test message</span><br><span class="line">S: A100 OK FETCH completed</span><br><span class="line">C: A101 FETCH BODY[<span class="type">TEXT</span>]</span><br><span class="line">S:* This is the fourth test message <span class="keyword">for</span> IMAP</span><br><span class="line">S: A101 OK FETCH completed</span><br></pre></td></tr></table></figure>
+
+<p>FETCH命令是IMAP协议里最复杂的命令。FETCH的命令参数很多、很复杂，但基本的特征是允许将邮件按照MIME结构拆解为零碎的部件来提取。例如，可以利用FETCH命令提取邮件头、某一个附件、或某一邮件附件头部的某一字段，等等。</p>
+<h3 id="STORE-mail-id-new-attributes"><a href="#STORE-mail-id-new-attributes" class="headerlink" title="STORE {mail id}{new attributes}"></a>STORE {mail id}{new attributes}</h3><p>STORE 命令用于修改指定邮件的属性，包括给邮件打上已读标记、删除标记，等等。STORE命令当前只有两个数据项类型可用，FLAGS：表示邮件的一组标志； FLAGS.SLIENT，表示一组邮件的标志，通过在两种数据项前加上加号或者减号可以进一步改变它们的执行情况，加号表示数据项的值添加到邮件中，减号表示将数据项的值从邮件中删除。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A003 STORE <span class="number">2</span>:<span class="number">4</span> +FLAGS (\Deleted)     </span><br><span class="line">S: * <span class="number">2</span> FETCH FLAGS (\Deleted \Seen)</span><br><span class="line">S: * <span class="number">3</span> FETCH FLAGS (\Deleted)</span><br><span class="line">S: * <span class="number">4</span> FETCH FLAGS (\Deleted \Flagged \Seen)</span><br><span class="line">S: A003 OK STORE completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="CLOSE"><a href="#CLOSE" class="headerlink" title="CLOSE"></a>CLOSE</h3><p>CLOSE命令表示Client结束对当前Folder（文件夹/邮箱）的访问，关闭邮箱该邮箱中所有标志为、DELETED的邮件就被从物理上删除。CLOSE没有命令参数。随后可以SELECT另一Folder。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A341 CLOSE</span><br><span class="line">S: A341 OK CLOSE completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="EXPUNGE"><a href="#EXPUNGE" class="headerlink" title="EXPUNGE"></a>EXPUNGE</h3><p>EXPUNGE命令在不关闭邮箱的情况下删除所有的标志为、DELETED的邮件。EXPUNGE删除的邮件将不可以恢复。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A202 EXPUNGE</span><br><span class="line">S: * <span class="number">3</span> EXPUNGE</span><br><span class="line">S: * <span class="number">3</span> EXPUNGE</span><br><span class="line">S: * <span class="number">5</span> EXPUNGE</span><br><span class="line">S: * <span class="number">8</span> EXPUNGE</span><br><span class="line">S: A202 OK EXPUNGE completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="EXAMINE-mailbox"><a href="#EXAMINE-mailbox" class="headerlink" title="EXAMINE {mailbox}"></a>EXAMINE {mailbox}</h3><p>EXAMINE命令以只读方式打开邮箱，参数是需要打开的邮箱的名字，使用EXAMINE命令打开的邮箱不允许对邮件进行改动，因此不能增加或删除邮件的标志。</p>
+<h3 id="SUBSCRIBE-mailbox"><a href="#SUBSCRIBE-mailbox" class="headerlink" title="SUBSCRIBE {mailbox}"></a>SUBSCRIBE {mailbox}</h3><p>SUBSCRIBE命令用来在客户机的活动邮箱列表中增加一个邮箱，该命令只有一个参数，希望添加的邮箱名。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A114 SUBSCRIBE new/anotherbox</span><br><span class="line">S: A114 OK SUBSCRIBE completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="UNSUBSCRIBE-mailbox"><a href="#UNSUBSCRIBE-mailbox" class="headerlink" title="UNSUBSCRIBE {mailbox}"></a>UNSUBSCRIBE {mailbox}</h3><p>UNSUBSCRIBE命令用来从活动列表中去掉一个邮箱，一个参数：希望去掉的邮箱名。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A115 UNSUBSCRIBE new/anotherbox</span><br><span class="line">S: A115 OK SUBSCRIBE completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="LSUB-folder-mailbox"><a href="#LSUB-folder-mailbox" class="headerlink" title="LSUB {folder}{mailbox}"></a>LSUB {folder}{mailbox}</h3><p>LSUB命令修正了LIST命令，LIST返回用户$HOME目录下所有的文件，但LSUB命令只显示那些使用SUBSCRIBE命令设置为活动邮箱的文件。两个参数：邮箱路径和邮箱名。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A116 LSUB “” *</span><br><span class="line">S:* LSUB () “/” stuff/junk</span><br><span class="line">S:* LSUB () “/” neebox</span><br><span class="line">S:* LSUB () “/” new/anotherbox</span><br><span class="line">S: A116 OK LSUB completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="STATUS-mailbox-parameter1-parameter2-……-parameter5"><a href="#STATUS-mailbox-parameter1-parameter2-……-parameter5" class="headerlink" title="STATUS {mailbox}({parameter1}{parameter2}……{parameter5})"></a>STATUS {mailbox}({parameter1}{parameter2}……{parameter5})</h3><p>STATUS命令查询邮箱的当前状态。第一个参数是需要查询的邮箱名，第二个参数是客户机需要查询的项目列表（要查询显示的信息），当在圆括号中。STATUS可以在不使用SELECT命令（打开邮箱）或者EXAMINE（以只读方式打开邮箱）前提下获取邮箱的信息。</p>
+<table>
+<thead>
+<tr>
+<th align="center">项目</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">MESSAGE</td>
+<td align="center">邮箱中的邮件总数</td>
+</tr>
+<tr>
+<td align="center">RECENT</td>
+<td align="center">邮箱中标志为\RECENT的邮件数</td>
+</tr>
+<tr>
+<td align="center">UIDNEXT</td>
+<td align="center">可以分配给新邮件的下一个UID</td>
+</tr>
+<tr>
+<td align="center">UIDVALIDITY</td>
+<td align="center">邮箱的UID有效性标志</td>
+</tr>
+<tr>
+<td align="center">UNSEEN</td>
+<td align="center">邮箱中没有被标志为\UNSEEN的邮件数</td>
+</tr>
+</tbody></table>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A117 STATUS inbox  (message recent unseen)</span><br><span class="line">S:* STATUS inbox (MESSAGE <span class="number">1</span> RECENT <span class="number">0</span> UNSENN <span class="number">0</span>)</span><br><span class="line">S: A117 OK STATUS completed</span><br><span class="line">C: A118 STATUS newbox  (message recent unseen)</span><br><span class="line">S:* STATUS inbox (MESSAGE <span class="number">1</span> RECENT <span class="number">0</span> UNSENN <span class="number">2</span>)</span><br><span class="line">S: A118 OK STATUS completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="CHECK"><a href="#CHECK" class="headerlink" title="CHECK"></a>CHECK</h3><p>CHECK命令用来在邮箱设置一个检查点。没有参数。就是IMAP中的sync命令。任何未完成的操作，例如从服务器内存向硬盘写数据，都将会被做完以保持邮箱的一致性状态。该命令确保乃村中的磁盘缓冲数据都被写到了磁盘上。</p>
+<h3 id="SEARCH-CHARSET-specification-search-criteria"><a href="#SEARCH-CHARSET-specification-search-criteria" class="headerlink" title="SEARCH [CHARSET specification] (search criteria)"></a>SEARCH [CHARSET specification] (search criteria)</h3><p>命令可以根据搜索条件在处于活动状态的邮箱中搜索邮件，然后显示匹配的邮件编号。字符集标志参数[CHARSET specification]由CHARSET和注册的字符集标志符组成，缺省的标志符是US-ASCⅡ，所以该参数长省略。search criteria：查询条件参数，明确查询的关键字和值。查询关键字有几十种。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A119 SEARCH header subject another</span><br><span class="line">S: SEARCH <span class="number">1</span> <span class="number">2</span></span><br><span class="line">S:* A119 OK SEARCH completed</span><br><span class="line">C: A120 SEARCH header subject another</span><br><span class="line">S: *SEARCH <span class="number">2</span></span><br><span class="line">S: A120 OK SEARCH completed</span><br><span class="line">C: A121 SEARCH UNSEEN</span><br><span class="line">S: *SEARCH <span class="number">1</span> <span class="number">2</span></span><br><span class="line">S: A120 OK SEARCH completed</span><br></pre></td></tr></table></figure>
+
+<p>以上每个例子都在邮件头的Subject:字段中查询一个不同的单词。服务器返回条件的邮件号列表，如果没有匹配邮件则返回不带UID的SEARCH单词。</p>
+<h3 id="COPY-mail-id-mailboxname"><a href="#COPY-mail-id-mailboxname" class="headerlink" title="COPY {mail id}{mailboxname}"></a>COPY {mail id}{mailboxname}</h3><p>COPY命令可以把邮件从一个邮箱复制到另一个邮箱，两个参数：mail id是希望从活动邮箱中复制的邮件的标号，mailboxname是希望邮件被复制到的邮箱。IAMP没有定义移动邮件的命令，移动操作相当于先把邮件复制到新邮箱中，然后对源邮箱中的邮件设置\DELETED标志。下一次执行检查点过后，新邮箱中的邮件被删除，新邮件就被显示出来。</p>
+<h3 id="UID"><a href="#UID" class="headerlink" title="UID"></a>UID</h3><p>UID 命令和FETCH、COPY、STORE命令或者SEARCH命令一起使用，它允许这些命令使用邮件的UID号而不是在邮箱中的顺序号。UID号是唯一标识邮件系统中邮件的32位证书。通常这些命令都使用顺序号来标识邮箱中的邮件，使用UID可以使IMAP客户机记住不同IMAP会话中的邮件。</p>
+<h3 id="CAPABILITY"><a href="#CAPABILITY" class="headerlink" title="CAPABILITY"></a>CAPABILITY</h3><p>CAPABILITY命令请求返回IMAP服务器支持的功能列表，服务器收到客户机发送的CAPABILITY命令后将返回该服务器所支持的功能。无参数。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C: A122 CAPABILITY</span><br><span class="line">S:*A122 CAPABILITY IMAP4 IMAP4REVl NAMESPACE IDLE SCAN SORT   MAILBOX</span><br><span class="line">-<span class="literal">-REFERRALS</span> [<span class="type">ic</span>:<span class="type">ccc</span>] LOGIN<span class="literal">-REFERRALS</span> AUTH=LOGIN THREAD=</span><br><span class="line">ORDERDSUBJECT</span><br><span class="line">S: A122 OK CAPABILITY completed</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="NOOP"><a href="#NOOP" class="headerlink" title="NOOP"></a>NOOP</h3><p>NOOP命令什么也不做，用来向服务器发送自动命令，防止因长时间处于不活动状态而导致连接中断，服务器对该命令的响应始终为肯定。无参数。</p>
+<h3 id="LOGOUT"><a href="#LOGOUT" class="headerlink" title="LOGOUT"></a>LOGOUT</h3><p>LOGOUT命令使当前登陆用户退出登陆并关闭所有打开的邮箱，任何做了\DELETED标志的邮件都将在这个时候被删除。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关阅读</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Internet-HTTP\" rel="bookmark">HTTP</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Internet-Network-architecture\" rel="bookmark">计算机网络体系结构</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Internet-TCP&UDP\" rel="bookmark">TCP和UDP的区别</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Android-Garble/" rel="prev" title="Android混淆">
+      <i class="fa fa-chevron-left"></i> Android混淆
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/VCS-Git/" rel="next" title="Git">
+      Git <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#和POP3的区别"><span class="nav-number">2.</span> <span class="nav-text">和POP3的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IMAP连接"><span class="nav-number">3.</span> <span class="nav-text">IMAP连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#协议状态"><span class="nav-number">4.</span> <span class="nav-text">协议状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用指令"><span class="nav-number">5.</span> <span class="nav-text">常用指令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#create-folder"><span class="nav-number">5.1.</span> <span class="nav-text">create {folder}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DELETE-folder"><span class="nav-number">5.2.</span> <span class="nav-text">DELETE {folder}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RENAME-old-folder-new-folder"><span class="nav-number">5.3.</span> <span class="nav-text">RENAME {old folder}{new folder}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LIST-BASE-template"><span class="nav-number">5.4.</span> <span class="nav-text">LIST {BASE}{template}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APPEND-folder-attributes-date-time-size-mail-data"><span class="nav-number">5.5.</span> <span class="nav-text">APPEND {folder}{attributes}{date&#x2F;time}{size}{mail data}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SELECT-folder"><span class="nav-number">5.6.</span> <span class="nav-text">SELECT {folder}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FETCH-mail-id-datanames"><span class="nav-number">5.7.</span> <span class="nav-text">FETCH {mail id}{datanames}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#STORE-mail-id-new-attributes"><span class="nav-number">5.8.</span> <span class="nav-text">STORE {mail id}{new attributes}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CLOSE"><span class="nav-number">5.9.</span> <span class="nav-text">CLOSE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXPUNGE"><span class="nav-number">5.10.</span> <span class="nav-text">EXPUNGE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EXAMINE-mailbox"><span class="nav-number">5.11.</span> <span class="nav-text">EXAMINE {mailbox}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SUBSCRIBE-mailbox"><span class="nav-number">5.12.</span> <span class="nav-text">SUBSCRIBE {mailbox}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UNSUBSCRIBE-mailbox"><span class="nav-number">5.13.</span> <span class="nav-text">UNSUBSCRIBE {mailbox}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSUB-folder-mailbox"><span class="nav-number">5.14.</span> <span class="nav-text">LSUB {folder}{mailbox}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#STATUS-mailbox-parameter1-parameter2-……-parameter5"><span class="nav-number">5.15.</span> <span class="nav-text">STATUS {mailbox}({parameter1}{parameter2}……{parameter5})</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CHECK"><span class="nav-number">5.16.</span> <span class="nav-text">CHECK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SEARCH-CHARSET-specification-search-criteria"><span class="nav-number">5.17.</span> <span class="nav-text">SEARCH [CHARSET specification] (search criteria)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COPY-mail-id-mailboxname"><span class="nav-number">5.18.</span> <span class="nav-text">COPY {mail id}{mailboxname}</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UID"><span class="nav-number">5.19.</span> <span class="nav-text">UID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPABILITY"><span class="nav-number">5.20.</span> <span class="nav-text">CAPABILITY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NOOP"><span class="nav-number">5.21.</span> <span class="nav-text">NOOP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LOGOUT"><span class="nav-number">5.22.</span> <span class="nav-text">LOGOUT</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jun"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-plane"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junzkn</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>

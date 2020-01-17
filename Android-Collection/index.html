@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://junzkn.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","width":300,"display":"post","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="概述Android系统中，内存对于应用的影响非常大。所以Android官方推荐在一些情况下使用优化的SparseArray、ArrayMap来替代Java的HashMap。 1.SparseArray在Android中，当数据长度小于千时，建议使用SparseArray替换HashMap。 SparseArray采用时间换取空间的方式，能够回收空间压缩数组，使用更少的内存来提高手机APP的运行效率">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android容器">
+<meta property="og:url" content="http://junzkn.github.io/Android-Collection/index.html">
+<meta property="og:site_name" content="Never And Ever">
+<meta property="og:description" content="概述Android系统中，内存对于应用的影响非常大。所以Android官方推荐在一些情况下使用优化的SparseArray、ArrayMap来替代Java的HashMap。 1.SparseArray在Android中，当数据长度小于千时，建议使用SparseArray替换HashMap。 SparseArray采用时间换取空间的方式，能够回收空间压缩数组，使用更少的内存来提高手机APP的运行效率">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://junzkn.github.io/Android-Collection/SparseArray%E7%BB%93%E6%9E%84.png">
+<meta property="og:image" content="http://junzkn.github.io/Android-Collection/ArrayMap%E7%BB%93%E6%9E%84.png">
+<meta property="article:published_time" content="2018-10-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2018-10-17T16:00:00.000Z">
+<meta property="article:author" content="Jun">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="容器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://junzkn.github.io/Android-Collection/SparseArray%E7%BB%93%E6%9E%84.png">
+
+<link rel="canonical" href="http://junzkn.github.io/Android-Collection/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Android容器 | Never And Ever</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Never And Ever</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">thanks for coming</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-时间线">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>时间线</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://junzkn.github.io/Android-Collection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Jun">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Never And Ever">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android容器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-10-18 00:00:00" itemprop="dateCreated datePublished" datetime="2018-10-18T00:00:00+08:00">2018-10-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Android系统中，内存对于应用的影响非常大。所以Android官方推荐在一些情况下使用优化的SparseArray、ArrayMap来替代Java的HashMap。</p>
+<h3 id="1-SparseArray"><a href="#1-SparseArray" class="headerlink" title="1.SparseArray"></a>1.SparseArray</h3><p>在Android中，当数据长度小于千时，建议使用SparseArray替换HashMap。</p>
+<p>SparseArray采用时间换取空间的方式，能够回收空间压缩数组，使用更少的内存来提高手机APP的运行效率，这也是其与HashMap的区别。</p>
+<p>SparseArray大部分操作需要使用二分查找方法，不是直接哈希，所以效率会较慢。</p>
+<p>在SparseArray内部，维护两个数组int[] mKeys和Object[] mValues。分别用于存放键和值，键只能是int类型。</p>
+<p><img src="/Android-Collection/SparseArray结构.png" alt="SparseArray结构"></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*put源码</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">int</span> key, E value)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 二分查找,key在mKeys列表中对应的index</span></span><br><span class="line">    <span class="keyword">int</span> i = ContainerHelpers.binarySearch(mKeys, mSize, key);</span><br><span class="line">    <span class="comment">// 如果找到，说明之前put过相同的key，则直接赋值</span></span><br><span class="line">    <span class="keyword">if</span> (i &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">        mValues[i] = value;</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="comment">// 找不到</span></span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// binarySearch方法中，找不到时，i取了其非，这里再次取非</span></span><br><span class="line">        i = ~i;</span><br><span class="line">        <span class="comment">// 如果有数据删除且整好是该位置，赋值</span></span><br><span class="line">        <span class="keyword">if</span> (i &lt; mSize &amp;&amp; mValues[i] == DELETED) &#123;</span><br><span class="line">            mKeys[i] = key;</span><br><span class="line">            mValues[i] = value;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果有数据被删除但不是该位置，使用gc函数回收空间，压缩压缩数组</span></span><br><span class="line">        <span class="keyword">if</span> (mGarbage &amp;&amp; mSize &gt;= mKeys.length) &#123;</span><br><span class="line">            gc();</span><br><span class="line">            <span class="comment">//再找一次，因为下标可能会变</span></span><br><span class="line">            i = ~ContainerHelpers.binarySearch(mKeys, mSize, key);</span><br><span class="line">        &#125;</span><br><span class="line">         <span class="comment">// 插入数据，根据情况增长mKeys与mValues列表</span></span><br><span class="line">        mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);</span><br><span class="line">        mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);</span><br><span class="line">        mSize++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*二分查找方法</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">binarySearch</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span> size, <span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> lo = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> hi = size - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (lo &lt;= hi) &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> mid = (lo + hi) &gt;&gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> midVal = array[mid];</span><br><span class="line">        <span class="keyword">if</span> (midVal &lt; value) &#123;</span><br><span class="line">            lo = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (midVal &gt; value) &#123;</span><br><span class="line">            hi = mid - <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> mid;  <span class="comment">// value found</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ~lo;  <span class="comment">// value not present</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*gc函数，压缩数组</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">gc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = mSize;</span><br><span class="line">    <span class="keyword">int</span> o = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span>[] keys = mKeys;</span><br><span class="line">    Object[] values = mValues;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        Object val = values[i];</span><br><span class="line">        <span class="keyword">if</span> (val != DELETED) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i != o) &#123;</span><br><span class="line">                keys[o] = keys[i];</span><br><span class="line">                values[o] = val;</span><br><span class="line">                values[i] = <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            o++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    mGarbage = <span class="keyword">false</span>;</span><br><span class="line">    mSize = o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h3 id="2-ArrayMap"><a href="#2-ArrayMap" class="headerlink" title="2.ArrayMap"></a>2.ArrayMap</h3><p>与SparesArray大致相同，会进行数组压缩，在内部使用二分查找方法，用时间换取空间。</p>
+<p>ArrayMap内部维护两个数组：int[] mHashes和Object[] mArray。mHashes用来存放key的哈希值，mArray用来存放键和值下标为单数用于存放key，下标为双数用于存放Value。</p>
+<p><img src="/Android-Collection/ArrayMap结构.png" alt="ArrayMap结构"></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*put源码</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> osize = mSize;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> hash;</span><br><span class="line">    <span class="keyword">int</span> index;</span><br><span class="line">    <span class="keyword">if</span> (key == <span class="keyword">null</span>) &#123;</span><br><span class="line">        hash = <span class="number">0</span>;</span><br><span class="line">        index = indexOfNull();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        hash = mIdentityHashCode ? System.identityHashCode(key) : key.hashCode();</span><br><span class="line">        <span class="comment">// 通过二分查找寻找下标</span></span><br><span class="line">        index = indexOf(key, hash);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// index大于0表示之前put过相同的key，进行赋值</span></span><br><span class="line">    <span class="keyword">if</span> (index &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">        index = (index&lt;&lt;<span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">final</span> V old = (V)mArray[index];</span><br><span class="line">        mArray[index] = value;</span><br><span class="line">        <span class="keyword">return</span> old;</span><br><span class="line">    &#125;</span><br><span class="line">    index = ~index;</span><br><span class="line">    <span class="comment">//需要扩容的情况</span></span><br><span class="line">    <span class="keyword">if</span> (osize &gt;= mHashes.length) &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> n = osize &gt;= (BASE_SIZE*<span class="number">2</span>) ? (osize+(osize&gt;&gt;<span class="number">1</span>))</span><br><span class="line">            : (osize &gt;= BASE_SIZE ? (BASE_SIZE*<span class="number">2</span>) : BASE_SIZE);</span><br><span class="line">        <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"put: grow from "</span> + mHashes.length + <span class="string">" to "</span> + n);</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] ohashes = mHashes;</span><br><span class="line">        <span class="keyword">final</span> Object[] oarray = mArray;</span><br><span class="line">        allocArrays(n);  <span class="comment">//扩容</span></span><br><span class="line">        <span class="keyword">if</span> (CONCURRENT_MODIFICATION_EXCEPTIONS &amp;&amp; osize != mSize) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//扩容后，需要把原来的数据拷贝到新数组中</span></span><br><span class="line">        <span class="keyword">if</span> (mHashes.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"put: copy 0-"</span> + osize + <span class="string">" to 0"</span>);</span><br><span class="line">            System.arraycopy(ohashes, <span class="number">0</span>, mHashes, <span class="number">0</span>, ohashes.length);</span><br><span class="line">            System.arraycopy(oarray, <span class="number">0</span>, mArray, <span class="number">0</span>, oarray.length);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//看看被废弃的数组是否还有利用价值</span></span><br><span class="line">        freeArrays(ohashes, oarray, osize);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//这次put的key对应的hashcode排序没有排在最后（index没有指示到数组结尾），因此需要移动index后面的数据</span></span><br><span class="line">    <span class="keyword">if</span> (index &lt; osize) &#123;</span><br><span class="line">        <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"put: move "</span> + index + <span class="string">"-"</span> + (osize-index)</span><br><span class="line">                         + <span class="string">" to "</span> + (index+<span class="number">1</span>));</span><br><span class="line">        System.arraycopy(mHashes, index, mHashes, index + <span class="number">1</span>, osize - index);</span><br><span class="line">        System.arraycopy(mArray, index &lt;&lt; <span class="number">1</span>, mArray, (index + <span class="number">1</span>) &lt;&lt; <span class="number">1</span>, (mSize - index) &lt;&lt; <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (CONCURRENT_MODIFICATION_EXCEPTIONS) &#123;</span><br><span class="line">        <span class="keyword">if</span> (osize != mSize || index &gt;= mHashes.length) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//进行存放</span></span><br><span class="line">    mHashes[index] = hash;</span><br><span class="line">    mArray[index&lt;&lt;<span class="number">1</span>] = key;</span><br><span class="line">    mArray[(index&lt;&lt;<span class="number">1</span>)+<span class="number">1</span>] = value;</span><br><span class="line">    mSize++;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* remove源码，对数组进行压缩在这里。</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> V <span class="title">removeAt</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> Object old = mArray[(index &lt;&lt; <span class="number">1</span>) + <span class="number">1</span>];</span><br><span class="line">    <span class="comment">//如果数据量小于等于1，说明删除该元素后，没有数组为空，清空两个数组。</span></span><br><span class="line">    <span class="keyword">if</span> (mSize &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// Now empty.</span></span><br><span class="line">        <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"remove: shrink from "</span> + mHashes.length + <span class="string">" to 0"</span>);</span><br><span class="line">        <span class="comment">//put中已有说明</span></span><br><span class="line">        freeArrays(mHashes, mArray, mSize);</span><br><span class="line">        mHashes = EmptyArray.INT;</span><br><span class="line">        mArray = EmptyArray.OBJECT;</span><br><span class="line">        mSize = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//如果当初申请的数组最大容纳数据个数大于BASE_SIZE的2倍（8），并且现在存储的数据量只用了申请数量的1/3，</span></span><br><span class="line">        <span class="comment">//则需要重新分配空间，已减少对内存的占用</span></span><br><span class="line">        <span class="keyword">if</span> (mHashes.length &gt; (BASE_SIZE*<span class="number">2</span>) &amp;&amp; mSize &lt; mHashes.length/<span class="number">3</span>) &#123;</span><br><span class="line">            <span class="comment">// Shrunk enough to reduce size of arrays.  We don't allow it to</span></span><br><span class="line">            <span class="comment">// shrink smaller than (BASE_SIZE*2) to avoid flapping between</span></span><br><span class="line">            <span class="comment">// that and BASE_SIZE.</span></span><br><span class="line">            <span class="comment">//新数组的大小</span></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> n = mSize &gt; (BASE_SIZE*<span class="number">2</span>) ? (mSize + (mSize&gt;&gt;<span class="number">1</span>)) : (BASE_SIZE*<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"remove: shrink from "</span> + mHashes.length + <span class="string">" to "</span> + n);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span>[] ohashes = mHashes;</span><br><span class="line">            <span class="keyword">final</span> Object[] oarray = mArray;</span><br><span class="line">            allocArrays(n);</span><br><span class="line">            mSize--;</span><br><span class="line">            <span class="comment">//index之前的数据拷贝到新数组中</span></span><br><span class="line">            <span class="keyword">if</span> (index &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"remove: copy from 0-"</span> + index + <span class="string">" to 0"</span>);</span><br><span class="line">                System.arraycopy(ohashes, <span class="number">0</span>, mHashes, <span class="number">0</span>, index);</span><br><span class="line">                System.arraycopy(oarray, <span class="number">0</span>, mArray, <span class="number">0</span>, index &lt;&lt; <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//将index之后的数据拷贝到新数组中，和（index&gt;0）的分支结合，就将index位置的数据删除了</span></span><br><span class="line">            <span class="keyword">if</span> (index &lt; mSize) &#123;</span><br><span class="line">                <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"remove: copy from "</span> + (index+<span class="number">1</span>) + <span class="string">"-"</span> + mSize</span><br><span class="line">                                 + <span class="string">" to "</span> + index);</span><br><span class="line">                System.arraycopy(ohashes, index + <span class="number">1</span>, mHashes, index, mSize - index);</span><br><span class="line">                System.arraycopy(oarray, (index + <span class="number">1</span>) &lt;&lt; <span class="number">1</span>, mArray, index &lt;&lt; <span class="number">1</span>,</span><br><span class="line">                                 (mSize - index) &lt;&lt; <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            mSize--;</span><br><span class="line">            <span class="comment">//将index后的数据向前移位</span></span><br><span class="line">            <span class="keyword">if</span> (index &lt; mSize) &#123;</span><br><span class="line">                <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">"remove: move "</span> + (index+<span class="number">1</span>) + <span class="string">"-"</span> + mSize</span><br><span class="line">                                 + <span class="string">" to "</span> + index);</span><br><span class="line">                System.arraycopy(mHashes, index + <span class="number">1</span>, mHashes, index, mSize - index);</span><br><span class="line">                System.arraycopy(mArray, (index + <span class="number">1</span>) &lt;&lt; <span class="number">1</span>, mArray, index &lt;&lt; <span class="number">1</span>,</span><br><span class="line">                                 (mSize - index) &lt;&lt; <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//移位后最后一个数据清空</span></span><br><span class="line">            mArray[mSize &lt;&lt; <span class="number">1</span>] = <span class="keyword">null</span>;</span><br><span class="line">            mArray[(mSize &lt;&lt; <span class="number">1</span>) + <span class="number">1</span>] = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (V)old;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关阅读</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Android-ANR\" rel="bookmark">ANR异常</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Android-Activity_change\" rel="bookmark">Activity的横竖屏切换</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\Android-Activity_Lunch_model\" rel="bookmark">Activity启动模式</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 容器</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Android-Activity_life_recycle/" rel="prev" title="Activity生命周期">
+      <i class="fa fa-chevron-left"></i> Activity生命周期
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/Data_structure-Basic_structure/" rel="next" title="数据结构的存储表示">
+      数据结构的存储表示 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-SparseArray"><span class="nav-number">2.</span> <span class="nav-text">1.SparseArray</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ArrayMap"><span class="nav-number">3.</span> <span class="nav-text">2.ArrayMap</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jun"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-plane"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junzkn</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script>
+
+    
+
+  
+
+</body>
+</html>

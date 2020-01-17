@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('http://junzkn.github.io').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.7.0',
+    exturl: false,
+    sidebar: {"position":"left","width":300,"display":"post","padding":18,"offset":12,"onmobile":true},
+    copycode: {"enable":true,"show_result":true,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="关于gradle构建慢最近在run应用时候特别慢，每一次几乎都是3-4分钟。看了一下是build时候transformclasseswithdexfordebug这个步骤拖慢的。最后在这里找到了解决方法，在build.gradle文件中设置： android &amp;#123;defaultConfig &amp;#123;    ...    multiDexEnabled true    ...&amp;#125;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="problem">
+<meta property="og:url" content="http://junzkn.github.io/problem/index.html">
+<meta property="og:site_name" content="Never And Ever">
+<meta property="og:description" content="关于gradle构建慢最近在run应用时候特别慢，每一次几乎都是3-4分钟。看了一下是build时候transformclasseswithdexfordebug这个步骤拖慢的。最后在这里找到了解决方法，在build.gradle文件中设置： android &amp;#123;defaultConfig &amp;#123;    ...    multiDexEnabled true    ...&amp;#125;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://junzkn.github.io/problem/1.PNG">
+<meta property="article:published_time" content="2020-01-17T07:12:39.894Z">
+<meta property="article:modified_time" content="2019-04-03T06:46:48.000Z">
+<meta property="article:author" content="Jun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://junzkn.github.io/problem/1.PNG">
+
+<link rel="canonical" href="http://junzkn.github.io/problem/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>problem | Never And Ever</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Never And Ever</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">thanks for coming</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-时间线">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>时间线</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://junzkn.github.io/problem/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Jun">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Never And Ever">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          problem
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-17 15:12:39" itemprop="dateCreated datePublished" datetime="2020-01-17T15:12:39+08:00">2020-01-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-04-03 14:46:48" itemprop="dateModified" datetime="2019-04-03T14:46:48+08:00">2019-04-03</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="关于gradle构建慢"><a href="#关于gradle构建慢" class="headerlink" title="关于gradle构建慢"></a>关于gradle构建慢</h3><p>最近在run应用时候特别慢，每一次几乎都是3-4分钟。看了一下是build时候<code>transformclasseswithdexfordebug</code>这个步骤拖慢的。最后在<a href="https://stackoverflow.com/questions/34158995/gradle-build-slow-on-transformclasseswithdexfordebug" target="_blank" rel="noopener">这里</a>找到了解决方法，在build.gradle文件中设置：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">defaultConfig &#123;</span><br><span class="line">    ...</span><br><span class="line">    multiDexEnabled <span class="literal">true</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">dexOptions &#123;</span><br><span class="line">    preDexLibraries <span class="literal">true</span></span><br><span class="line">    javaMaxHeapSize <span class="string">"4g"</span> <span class="comment">// Use gig increments depending on needs</span></span><br><span class="line">    incremental <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="找不到android库"><a href="#找不到android库" class="headerlink" title="找不到android库"></a>找不到android库</h3><p>新拉的项目build时候出现如下错误：</p>
+<p><img src="/problem/1.PNG" alt="捕获"></p>
+<p>错误是指找不到android supprot库。在项目buid.gradle配置中的仓库把<code>google()</code>放到前面</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()  <span class="comment">//把google的仓库放到第一个</span></span><br><span class="line">        jcenter()</span><br><span class="line">        maven &#123; url <span class="string">'https://jitpack.io'</span> &#125;</span><br><span class="line">        flatDir &#123;</span><br><span class="line">            dirs <span class="string">'libs'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="找不到对应NDK"><a href="#找不到对应NDK" class="headerlink" title="找不到对应NDK"></a>找不到对应NDK</h3><p>在重构旧项目时，拉下项目后build出现了找不到对应NDK版本如下：</p>
+<p><code>No toolchains found in the NDK toolchains folder for ABI with prefix: mips64el-linux-android</code>。这个错误时因为AS3.0以上开发环境导致的，解决方法有两个：</p>
+<ol>
+<li>从<a href="https://developer.android.com/ndk/downloads/?hl=zh-cn" target="_blank" rel="noopener">官网</a>上下载16版本的NDK，在toolchains文件夹找到缺失的NDK，弄到本地就行。</li>
+<li>改变gradle plugin版本，这个还需要同时改变gradle版本，因为需要对应。不建议改到最新的gradle plugin版本，可能会出现资源整合错误，这个错误需要一个一个文件改成该版本格式。</li>
+</ol>
+<h3 id="AndroidStudio常用操作"><a href="#AndroidStudio常用操作" class="headerlink" title="AndroidStudio常用操作"></a>AndroidStudio常用操作</h3><p><code>ctrl+F</code>文件内全文件搜索字段</p>
+<p><code>ctrl+shift+F</code>路径内全路径搜索字段</p>
+<p><code>ctrl+N</code>全局找类名</p>
+<p><code>ctrl+shift+N</code>全局找文件</p>
+<p><code>shift+shift</code> search everywhere</p>
+<p>点击文件再<code>ctrl+D</code>对比文件</p>
+<h3 id="设置Activity半透明覆盖于之前Activity上"><a href="#设置Activity半透明覆盖于之前Activity上" class="headerlink" title="设置Activity半透明覆盖于之前Activity上"></a>设置Activity半透明覆盖于之前Activity上</h3><h3 id="关于Glide缓存导致图片资源出错"><a href="#关于Glide缓存导致图片资源出错" class="headerlink" title="关于Glide缓存导致图片资源出错"></a>关于Glide缓存导致图片资源出错</h3><h3 id="圆角图片"><a href="#圆角图片" class="headerlink" title="圆角图片"></a>圆角图片</h3><h2 id="drawable中的selector-shape等"><a href="#drawable中的selector-shape等" class="headerlink" title="drawable中的selector,shape等"></a>drawable中的selector,shape等</h2><h3 id="沉浸式状态栏"><a href="#沉浸式状态栏" class="headerlink" title="沉浸式状态栏"></a>沉浸式状态栏</h3>
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/Android-Animation/" rel="next" title="Android动画">
+      Android动画 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于gradle构建慢"><span class="nav-number">1.</span> <span class="nav-text">关于gradle构建慢</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#找不到android库"><span class="nav-number">2.</span> <span class="nav-text">找不到android库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#找不到对应NDK"><span class="nav-number">3.</span> <span class="nav-text">找不到对应NDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AndroidStudio常用操作"><span class="nav-number">4.</span> <span class="nav-text">AndroidStudio常用操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置Activity半透明覆盖于之前Activity上"><span class="nav-number">5.</span> <span class="nav-text">设置Activity半透明覆盖于之前Activity上</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于Glide缓存导致图片资源出错"><span class="nav-number">6.</span> <span class="nav-text">关于Glide缓存导致图片资源出错</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#圆角图片"><span class="nav-number">7.</span> <span class="nav-text">圆角图片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#drawable中的selector-shape等"><span class="nav-number"></span> <span class="nav-text">drawable中的selector,shape等</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#沉浸式状态栏"><span class="nav-number">1.</span> <span class="nav-text">沉浸式状态栏</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jun"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Jun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-plane"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junzkn</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
